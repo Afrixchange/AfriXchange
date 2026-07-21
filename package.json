@@ -11,6 +11,8 @@
     "dev": "npm run dev --workspace=apps/api",
     "build": "npm run build --workspace=apps/api",
     "lint": "eslint ."
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
-
