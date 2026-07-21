@@ -1,0 +1,12 @@
+{
+  "name": "@afrixchange/fx-conversion",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "dependencies": {
+    "@afrixchange/common": "*",
+    "@afrixchange/ledger": "*",
+    "@afrixchange/wallet": "*",
+    "@supabase/supabase-js": "^2.49.4"
+  }
+}

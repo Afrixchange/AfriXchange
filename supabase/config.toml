@@ -1,0 +1,75 @@
+# Supabase project configuration for AfriXchange MVP
+# Reference: https://supabase.com/docs/guides/cli/config
+
+[AUTH]
+enabled = true
+site_url = "http://localhost:5174"
+additional_redirect_urls = ["http://localhost:5173"]
+jwt_expiry = 3600
+
+[AUTH.EMAIL]
+enable_signup = true
+enable_autoconfirm = true
+enable_confirmations = false
+
+[AUTH.SMS]
+enable_signup = false
+provider = "twilio"
+
+[API]
+enabled = true
+port = 54321
+schemas = ["public", "auth"]
+extra_search_path = ["public"]
+
+[DB]
+migration_dir = "infrastructure/db-migrations"
+seed_file = ""
+
+[STORAGE]
+enabled = true
+
+[[STORAGE.BUCKETS]]
+name = "kyc-documents"
+public = false
+file_size_limit = "5MB"
+allowed_mime_types = ["image/jpeg", "image/png", "application/pdf"]
+
+[[STORAGE.BUCKETS]]
+name = "kyc-selfies"
+public = false
+file_size_limit = "5MB"
+allowed_mime_types = ["image/jpeg", "image/png"]
+
+# Edge Functions
+[[EDGE_FUNCTIONS]]
+name = "kyc-submit"
+verify_jwt = true
+
+[[EDGE_FUNCTIONS]]
+name = "kyc-webhook"
+verify_jwt = false
+
+[[EDGE_FUNCTIONS]]
+name = "paystack-webhook"
+verify_jwt = false
+
+[[EDGE_FUNCTIONS]]
+name = "initiate-withdrawal"
+verify_jwt = true
+
+[[EDGE_FUNCTIONS]]
+name = "initiate-deposit"
+verify_jwt = true
+
+[[EDGE_FUNCTIONS]]
+name = "get-conversion-rate"
+verify_jwt = true
+
+[[EDGE_FUNCTIONS]]
+name = "execute-conversion"
+verify_jwt = true
+
+[[EDGE_FUNCTIONS]]
+name = "compliance-check"
+verify_jwt = false
