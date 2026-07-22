@@ -29,28 +29,28 @@ const faqs = [
 
 export default function Help() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
+    <div className="min-h-screen bg-surface">
+      <header className="bg-surface-card border-b border-border-subtle px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center gap-3">
-          <Link to="/home" className="text-gray-500 hover:text-dark">
+          <Link to="/home" className="text-ink/60 hover:text-ink">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="text-xl font-bold text-dark">Help & Support</h1>
+          <h1 className="text-xl font-bold text-ink">Help & Support</h1>
         </div>
       </header>
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Contact Card */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h2 className="text-lg font-semibold text-dark mb-2">Need help?</h2>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-surface-card p-6 rounded-xl border border-border-subtle">
+          <h2 className="text-lg font-semibold text-ink mb-2">Need help?</h2>
+          <p className="text-sm text-ink/60 mb-4">
             Our support team is available to assist you.
           </p>
           <a
             href="mailto:support@afrixchange.com"
-            className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+            className="inline-flex items-center gap-2 text-brand font-semibold hover:underline"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -61,13 +61,13 @@ export default function Help() {
 
         {/* FAQs */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-dark">Frequently Asked Questions</h2>
+          <h2 className="text-lg font-semibold text-ink">Frequently Asked Questions</h2>
           {faqs.map((faq, i) => (
-            <details key={i} className="bg-white rounded-xl border border-gray-200 group">
+            <details key={i} className="bg-surface-card rounded-xl border border-border-subtle group">
               <summary className="p-4 cursor-pointer list-none flex items-center justify-between">
-                <span className="font-medium text-dark text-sm">{faq.q}</span>
+                <span className="font-medium text-ink text-sm">{faq.q}</span>
                 <svg
-                  className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
+                  className="w-5 h-5 text-ink/40 group-open:rotate-180 transition-transform"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -76,7 +76,7 @@ export default function Help() {
                 </svg>
               </summary>
               <div className="px-4 pb-4">
-                <p className="text-sm text-gray-500">{faq.a}</p>
+                <p className="text-sm text-ink/60">{faq.a}</p>
               </div>
             </details>
           ))}

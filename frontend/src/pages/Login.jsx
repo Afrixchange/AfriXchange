@@ -34,17 +34,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-surface">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">AfriXchange</Link>
-          <h2 className="text-2xl font-bold text-dark mt-6">Welcome back</h2>
-          <p className="text-gray-500 mt-2">Log in to your account</p>
+          <Link to="/" className="text-2xl font-bold text-brand">AfriXchange</Link>
+          <h2 className="text-2xl font-bold text-ink mt-6">Welcome back</h2>
+          <p className="text-ink/60 mt-2">Log in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-surface-card p-8 rounded-xl shadow-sm border border-border-subtle space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -66,7 +66,7 @@ export default function Login() {
           />
 
           <div className="flex justify-end">
-            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+            <Link to="/forgot-password" className="text-sm text-brand hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -75,9 +75,9 @@ export default function Login() {
             Log In
           </Button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-ink/60 mt-4">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-primary font-semibold hover:underline">
+            <Link to="/signup" className="text-brand font-semibold hover:underline">
               Sign Up
             </Link>
           </p>

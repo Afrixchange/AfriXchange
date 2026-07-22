@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
-
-// Add to index.html <head>:
-// <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+import { useWallets } from '../features/wallet/useWallets'
 
 const NAV = [
   { to: '/', label: 'Home', d: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10' },
@@ -25,29 +23,29 @@ export default function Home() {
   const { profile, signOut } = useAuth()
   const { pathname } = useLocation()
   const [showBalance, setShowBalance] = useState(true)
+  const { data: wallets = [] } = useWallets()
 
   async function handleSignOut() {
     await signOut()
   }
 
-  // Placeholder wallets data — will be replaced with useWallets hook in Phase 3
-  const wallets = [
-    { currency: 'NGN', balance: 0 },
-    { currency: 'USD', balance: 0 },
-    { currency: 'USDT', balance: 0 },
-  ]
-
-  const totalNGN = 0 // placeholder — will sum converted balances in Phase 3
+  // Calculate total NGN balance (USD/NGN rate ~1515, USDT/NGN rate ~1515)
+  const totalNGN = wallets.reduce((sum, w) => {
+    const balance = parseFloat(w.balance || 0)
+    if (w.currency === 'NGN') return sum + balance
+    if (w.currency === 'USD' || w.currency === 'USDT') return sum + balance * 1515
+    return sum
+  }, 0)
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
 
   return (
-    <div className="min-h-screen bg-[#F3EFF9] md:flex">
+    <div className="min-h-screen bg-[var(--color-surface)] md:flex">
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-white border-r border-[#EAE3F7]">
+      <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-white border-r border-[var(--color-surface)]">
         <div className="px-6 py-6">
-          <span className="font-[Poppins] font-semibold text-lg text-[#3A2E52]">
-            <span className="text-[#5B1FB0]">Afri</span>Xchange
+          <span className="font-[Poppins] font-semibold text-lg text-[var(--color-ink)]">
+            <span className="text-[var(--color-brand)]">Afri</span>Xchange
           </span>
         </div>
         <nav className="flex-1 px-3 space-y-1">
@@ -57,8 +55,8 @@ export default function Home() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0] ${
-                  active ? 'bg-[#5B1FB0] text-white' : 'text-[#3A2E52]/70 hover:bg-[#F3EFF9] hover:text-[#3A2E52]'
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
+                  active ? 'bg-[var(--color-brand)] text-white' : 'text-[var(--color-ink)]/70 hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]'
                 }`}
               >
                 <svg className="w-4.5 h-4.5 shrink-0" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,19 +67,23 @@ export default function Home() {
             )
           })}
         </nav>
-        <div className="px-3 py-4 border-t border-[#EAE3F7]">
+        <div className="px-3 py-4 border-t border-[var(--color-surface)]">
           <Link
             to="/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#F3EFF9] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0]"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[var(--color-surface)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
           >
-            <div className="w-8 h-8 rounded-full bg-[#5B1FB0] flex items-center justify-center text-white text-xs font-semibold shrink-0">
-              {firstName.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm font-medium text-[#3A2E52] truncate">{profile?.full_name || 'Profile'}</span>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-[var(--color-brand)] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                {firstName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="text-sm font-medium text-[var(--color-ink)] truncate">{profile?.full_name || 'Profile'}</span>
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full mt-1 flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-[#3A2E52]/60 hover:bg-[#F3EFF9] hover:text-[#3A2E52] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0]"
+            className="w-full mt-1 flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-[var(--color-ink)]/60 hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
           >
             <svg className="w-4.5 h-4.5" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -94,18 +96,22 @@ export default function Home() {
       <div className="flex-1 md:ml-64">
 
         {/* Mobile purple hero — hidden on desktop */}
-        <header className="md:hidden bg-gradient-to-b from-[#5B1FB0] to-[#7A2FD6] px-4 pt-6 pb-16 rounded-b-[32px]">
+        <header className="md:hidden bg-gradient-to-b from-[var(--color-brand)] to-[#7A2FD6] px-4 pt-6 pb-16 rounded-b-[32px]">
           <div className="max-w-lg mx-auto">
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+              ) : (
                 <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white font-[Poppins] font-semibold">
                   {firstName.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <p className="text-white/60 text-xs">Welcome back</p>
-                  <p className="text-white font-[Poppins] font-medium">{firstName}</p>
-                </div>
+              )}
+              <div>
+                <p className="text-white/60 text-xs">Welcome back</p>
+                <p className="text-white font-[Poppins] font-medium">{firstName}</p>
               </div>
+            </div>
               <div className="flex items-center gap-3">
                 <Link to="/profile" aria-label="Profile" className="text-white/70 hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,8 +151,8 @@ export default function Home() {
         {/* Desktop top bar — hidden on mobile */}
         <header className="hidden md:flex items-center justify-between px-8 py-6">
           <div>
-            <p className="text-[#3A2E52]/50 text-sm">Welcome back</p>
-            <h1 className="font-[Poppins] font-semibold text-2xl text-[#3A2E52]">{firstName}</h1>
+            <p className="text-[var(--color-ink)]/50 text-sm">Welcome back</p>
+            <h1 className="font-[Poppins] font-semibold text-2xl text-[var(--color-ink)]">{firstName}</h1>
           </div>
         </header>
 
@@ -157,7 +163,7 @@ export default function Home() {
             <div className="md:col-span-2 space-y-6">
 
               {/* Desktop balance card — hidden on mobile (mobile shows it in the hero above) */}
-              <section className="hidden md:block bg-gradient-to-r from-[#5B1FB0] to-[#7A2FD6] rounded-2xl p-6">
+              <section className="hidden md:block bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-6">
                 <p className="text-white/60 text-sm mb-1">Total balance (NGN)</p>
                 <div className="flex items-center gap-3">
                   <p className="text-white font-[Poppins] font-semibold text-3xl">
@@ -180,15 +186,15 @@ export default function Home() {
               </section>
 
               {/* Quick actions */}
-              <section className="bg-white rounded-3xl shadow-lg shadow-[#5B1FB0]/10 p-5 grid grid-cols-4 gap-2">
+              <section className="bg-white rounded-3xl shadow-lg shadow-[var(--color-brand)]/10 p-5 grid grid-cols-4 gap-2">
                 {ACTIONS.map(action => (
-                  <Link key={action.to} to={action.to} className="flex flex-col items-center gap-2 group rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0]">
-                    <div className="w-12 h-12 rounded-full bg-[#F3EFF9] group-hover:bg-[#5B1FB0] flex items-center justify-center transition-colors">
-                      <svg className="w-5 h-5 text-[#5B1FB0] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <Link key={action.to} to={action.to} className="flex flex-col items-center gap-2 group rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]">
+                    <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] group-hover:bg-[var(--color-brand)] flex items-center justify-center transition-colors">
+                      <svg className="w-5 h-5 text-[var(--color-brand)] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={action.d} />
                       </svg>
                     </div>
-                    <span className="text-[11px] font-medium text-[#3A2E52]">{action.label}</span>
+                    <span className="text-[11px] font-medium text-[var(--color-ink)]">{action.label}</span>
                   </Link>
                 ))}
               </section>
@@ -196,30 +202,30 @@ export default function Home() {
               {/* Wallets */}
               <section>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-[Poppins] font-semibold text-[#3A2E52]">Your Wallets</h2>
-                  <Link to="/wallets" className="text-xs font-medium text-[#5B1FB0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0] rounded">See all</Link>
+                  <h2 className="font-[Poppins] font-semibold text-[var(--color-ink)]">Your Wallets</h2>
+                  <Link to="/wallets" className="text-xs font-medium text-[var(--color-brand)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] rounded">See all</Link>
                 </div>
                 <div className="space-y-3 md:grid md:grid-cols-3 md:gap-3 md:space-y-0">
                   {wallets.map(wallet => (
                     <Link
                       key={wallet.currency}
                       to={`/wallet/${wallet.currency}`}
-                      className="flex items-center justify-between md:flex-col md:items-start md:gap-4 bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0]"
+                      className="flex items-center justify-between md:flex-col md:items-start md:gap-4 bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#F3EFF9] flex items-center justify-center text-[#5B1FB0] font-semibold text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-brand)] font-semibold text-sm shrink-0">
                           {wallet.currency.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-[#3A2E52]">{WALLET_LABEL[wallet.currency]}</p>
-                          <p className="text-xs text-[#3A2E52]/50">{wallet.currency} Wallet</p>
+                          <p className="text-sm font-medium text-[var(--color-ink)]">{WALLET_LABEL[wallet.currency]}</p>
+                          <p className="text-xs text-[var(--color-ink)]/50">{wallet.currency} Wallet</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 md:w-full md:justify-between">
-                        <p className="font-[Poppins] font-medium text-[#3A2E52]">
+                        <p className="font-[Poppins] font-medium text-[var(--color-ink)]">
                           {showBalance ? wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '••••'}
                         </p>
-                        <svg className="w-4 h-4 text-[#3A2E52]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-[var(--color-ink)]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -232,16 +238,16 @@ export default function Home() {
             {/* Right column — desktop only companion panel */}
             <div className="hidden md:block space-y-6">
               <section className="bg-white rounded-2xl p-5 shadow-sm">
-                <h3 className="font-[Poppins] font-medium text-sm text-[#3A2E52] mb-3">Recent activity</h3>
-                <p className="text-sm text-[#3A2E52]/40">No transactions yet.</p>
+                <h3 className="font-[Poppins] font-medium text-sm text-[var(--color-ink)] mb-3">Recent activity</h3>
+                <p className="text-sm text-[var(--color-ink)]/40">No transactions yet.</p>
               </section>
 
-              <section className="bg-gradient-to-r from-[#5B1FB0] to-[#7A2FD6] rounded-2xl p-5">
+              <section className="bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-5">
                 <p className="text-white font-[Poppins] font-medium text-sm">Need a hand?</p>
                 <p className="text-white/70 text-xs mt-0.5 mb-4">We're here 24/7</p>
                 <Link
                   to="/help"
-                  className="inline-block bg-white text-[#5B1FB0] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-block bg-white text-[var(--color-brand)] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Get support
                 </Link>
@@ -250,14 +256,14 @@ export default function Home() {
           </div>
 
           {/* Mobile-only promo strip */}
-          <section className="md:hidden mt-6 bg-gradient-to-r from-[#5B1FB0] to-[#7A2FD6] rounded-2xl p-5 flex items-center justify-between">
+          <section className="md:hidden mt-6 bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-5 flex items-center justify-between">
             <div>
               <p className="text-white font-[Poppins] font-medium text-sm">Need a hand?</p>
               <p className="text-white/70 text-xs mt-0.5">We're here 24/7</p>
             </div>
             <Link
               to="/help"
-              className="bg-white text-[#5B1FB0] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="bg-white text-[var(--color-brand)] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Get support
             </Link>
@@ -266,7 +272,7 @@ export default function Home() {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-[#EAE3F7] px-2 py-2 flex items-center justify-around">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-[var(--color-surface)] px-2 py-2 flex items-center justify-around">
         {NAV.map(item => {
           const active = pathname === item.to
           return (
@@ -275,8 +281,8 @@ export default function Home() {
               to={item.to}
               aria-label={item.label}
               aria-current={active ? 'page' : undefined}
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B1FB0] ${
-                active ? 'text-[#5B1FB0]' : 'text-[#3A2E52]/40'
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
+                active ? 'text-[var(--color-brand)]' : 'text-[var(--color-ink)]/40'
               }`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

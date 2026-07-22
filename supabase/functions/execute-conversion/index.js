@@ -6,9 +6,17 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-// In production, share quote store with get-conversion-rate via Redis
-// For MVP, we use a global Map (works within the same Edge Function instance)
-const quotes = new Map()
+// Mock rates for validation — must match get-conversion-rate
+const MOCK_RATES = {
+  'NGN-USD': 0.00066,
+  'USD-NGN': 1515,
+  'NGN-USDT': 0.00066,
+  'USDT-NGN': 1515,
+  'USD-USDT': 1,
+  'USDT-USD': 1,
+  'NGN-KES': 0.019,
+  'KES-NGN': 52.5,
+}
 
 Deno.serve(async (req) => {
   try {
@@ -27,26 +35,32 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
     }
 
-    const { quoteId, amount, pin } = await req.json()
+    const body = await req.json()
+    const { from, to, amount, rate, pin } = body
 
-    // Validate quote
-    const quote = quotes.get(quoteId)
-    if (!quote) {
-      return new Response(JSON.stringify({ error: 'Quote not found or expired. Please fetch a new rate.' }), { status: 400 })
-    }
-    if (quote.used) {
-      return new Response(JSON.stringify({ error: 'Quote already used. Please fetch a new rate.' }), { status: 400 })
-    }
-    if (Date.now() > quote.expiresAt) {
-      return new Response(JSON.stringify({ error: 'Quote has expired. Please fetch a new rate.' }), { status: 400 })
-    }
-
-    // Verify PIN
+    // Verify KYC is approved
     const { data: profile } = await supabase
       .from('profiles')
-      .select('transaction_pin_hash')
+      .select('kyc_status, transaction_pin_hash')
       .eq('id', user.id)
       .single()
+
+    if (!profile || profile.kyc_status !== 'approved') {
+      return new Response(JSON.stringify({
+        error: 'KYC verification required. Please complete identity verification before converting.',
+        kycRequired: true,
+      }), { status: 403 })
+    }
+
+    // Validate rate matches expected rate for the pair
+    const pair = `${from}-${to}`
+    const expectedRate = MOCK_RATES[pair]
+    if (!expectedRate) {
+      return new Response(JSON.stringify({ error: `Unsupported pair: ${pair}` }), { status: 400 })
+    }
+    if (parseFloat(rate) !== expectedRate) {
+      return new Response(JSON.stringify({ error: 'Rate has changed. Please fetch a new rate.' }), { status: 400 })
+    }
 
     if (!profile?.transaction_pin_hash) {
       return new Response(JSON.stringify({ error: 'Transaction PIN not set' }), { status: 400 })
@@ -55,44 +69,78 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Invalid PIN' }), { status: 400 })
     }
 
-    // Mark quote as used
-    quote.used = true
-    quotes.set(quoteId, quote)
-
     const amountNum = parseFloat(amount)
-    const convertedAmount = (amountNum * quote.rate).toFixed(2)
+    const convertedAmount = (amountNum * parseFloat(rate)).toFixed(2)
 
     // Check source wallet balance
     const { data: fromWallet } = await supabase
       .from('wallets')
       .select('*')
       .eq('user_id', user.id)
-      .eq('currency', quote.fromCurrency)
+      .eq('currency', from)
       .single()
 
     if (!fromWallet || parseFloat(fromWallet.balance) < amountNum) {
-      return new Response(JSON.stringify({ error: `Insufficient ${quote.fromCurrency} balance` }), { status: 400 })
+      return new Response(JSON.stringify({ error: `Insufficient ${from} balance` }), { status: 400 })
     }
 
-    // Create transaction record
+    // Create pending transaction first for compliance check
     const ref = `CNV-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`
     const { data: tx, error: txError } = await supabase
       .from('transactions')
       .insert({
         user_id: user.id,
         type: 'conversion',
-        status: 'success',
-        currency_from: quote.fromCurrency,
-        currency_to: quote.toCurrency,
+        status: 'pending',
+        currency_from: from,
+        currency_to: to,
         amount_from: amountNum,
         amount_to: parseFloat(convertedAmount),
-        rate: quote.rate,
+        rate: parseFloat(rate),
         provider_ref: ref,
       })
       .select()
       .single()
 
     if (txError) throw txError
+
+    // Run compliance check before processing conversion
+    const complianceCheckUrl = `${supabaseUrl}/functions/v1/compliance-check`
+    const complianceResult = await fetch(complianceCheckUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        transaction_id: tx.id,
+        user_id: user.id,
+        type: 'convert',
+        amount: amountNum,
+      }),
+    }).then(r => r.json())
+
+    if (complianceResult.passed === false) {
+      return new Response(JSON.stringify({
+        transactionId: tx.id,
+        ref,
+        fromCurrency: from,
+        toCurrency: to,
+        amount: amountNum,
+        held: true,
+        reason: complianceResult.reason || 'Transaction flagged for compliance review',
+        heldTransactionUrl: `/transaction/held/${tx.id}`,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    // Compliance passed — update transaction to success and process wallets
+    await supabase
+      .from('transactions')
+      .update({ status: 'success' })
+      .eq('id', tx.id)
 
     // Debit source wallet
     const newFromBalance = parseFloat(fromWallet.balance) - amountNum
@@ -106,7 +154,7 @@ Deno.serve(async (req) => {
       .from('wallets')
       .select('*')
       .eq('user_id', user.id)
-      .eq('currency', quote.toCurrency)
+      .eq('currency', to)
       .single()
 
     if (toWallet) {
@@ -120,7 +168,7 @@ Deno.serve(async (req) => {
         .from('wallets')
         .insert({
           user_id: user.id,
-          currency: quote.toCurrency,
+          currency: to,
           balance: parseFloat(convertedAmount),
         })
     }
@@ -128,11 +176,11 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       transactionId: tx.id,
       ref,
-      fromCurrency: quote.fromCurrency,
-      toCurrency: quote.toCurrency,
+      fromCurrency: from,
+      toCurrency: to,
       amount: amountNum,
       convertedAmount: parseFloat(convertedAmount),
-      rate: quote.rate,
+      rate: parseFloat(rate),
     }), {
       headers: { 'Content-Type': 'application/json' },
       status: 200,
@@ -144,3 +192,4 @@ Deno.serve(async (req) => {
     })
   }
 })
+

@@ -23,6 +23,20 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
     }
 
+    // Verify KYC is approved
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('kyc_status')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || profile.kyc_status !== 'approved') {
+      return new Response(JSON.stringify({
+        error: 'KYC verification required. Please complete identity verification before depositing.',
+        kycRequired: true,
+      }), { status: 403 })
+    }
+
     const { amount, currency, provider } = await req.json()
     const amountNum = parseFloat(amount)
     const ref = `DEP-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`
@@ -51,6 +65,38 @@ Deno.serve(async (req) => {
         { user_id: user.id, currency: currency || 'NGN', balance: 0 },
         { onConflict: 'user_id,currency', ignoreDuplicates: true }
       )
+
+    // Run compliance check
+    const complianceCheckUrl = `${supabaseUrl}/functions/v1/compliance-check`
+    const complianceResult = await fetch(complianceCheckUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        transaction_id: tx.id,
+        user_id: user.id,
+        type: 'deposit',
+        amount: amountNum,
+      }),
+    }).then(r => r.json())
+
+    if (complianceResult.passed === false) {
+      // Transaction already flagged as 'held' by compliance-check function
+      return new Response(JSON.stringify({
+        transactionId: tx.id,
+        ref,
+        amount: amountNum,
+        currency: currency || 'NGN',
+        held: true,
+        reason: complianceResult.reason || 'Transaction flagged for compliance review',
+        heldTransactionUrl: `/transaction/held/${tx.id}`,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
 
     return new Response(JSON.stringify({
       transactionId: tx.id,

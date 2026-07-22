@@ -7,10 +7,11 @@ import Input from '../components/ui/Input'
 export default function SignUp() {
   const navigate = useNavigate()
   const { signUp } = useAuth()
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
+    username: '',
     password: '',
     confirmPassword: ''
   })
@@ -20,7 +21,9 @@ export default function SignUp() {
 
   function validate() {
     const newErrors = {}
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required'
+if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required'
+    if (!formData.username.trim()) newErrors.username = 'Username is required'
+    else if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.username)) newErrors.username = 'Username must be 3-20 chars, letters, numbers, underscore'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email address'
     if (!formData.password) newErrors.password = 'Password is required'
@@ -35,12 +38,13 @@ export default function SignUp() {
     setServerError('')
     if (!validate()) return
 
-    setLoading(true)
+setLoading(true)
     const { error } = await signUp(
       formData.email,
       formData.password,
       formData.fullName,
-      formData.phone
+      formData.phone,
+      formData.username
     )
     setLoading(false)
 
@@ -49,8 +53,8 @@ export default function SignUp() {
       return
     }
 
-    // Navigate to OTP verification
-    navigate('/verify-otp', { state: { email: formData.email } })
+    // Navigate to onboarding
+    navigate('/onboarding')
   }
 
   function handleChange(field) {
@@ -58,27 +62,35 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-surface">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">AfriXchange</Link>
-          <h2 className="text-2xl font-bold text-dark mt-6">Create your account</h2>
-          <p className="text-gray-500 mt-2">Start exchanging across borders</p>
+          <Link to="/" className="text-2xl font-bold text-brand">AfriXchange</Link>
+          <h2 className="text-2xl font-bold text-ink mt-6">Create your account</h2>
+          <p className="text-ink/60 mt-2">Start exchanging across borders</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-surface-card p-8 rounded-xl shadow-sm border border-border-subtle space-y-4">
           {serverError && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {serverError}
             </div>
           )}
 
-          <Input
+<Input
             label="Full Name"
             placeholder="John Doe"
             value={formData.fullName}
             onChange={handleChange('fullName')}
             error={errors.fullName}
+          />
+
+          <Input
+            label="Username"
+            placeholder="johndoe"
+            value={formData.username}
+            onChange={handleChange('username')}
+            error={errors.username}
           />
 
           <Input
@@ -120,9 +132,9 @@ export default function SignUp() {
             Create Account
           </Button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-ink/60 mt-4">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary font-semibold hover:underline">
+            <Link to="/login" className="text-brand font-semibold hover:underline">
               Log In
             </Link>
           </p>

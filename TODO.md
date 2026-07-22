@@ -1,32 +1,32 @@
-# AfriXchange Backend Implementation — COMPLETE ✅
+# AfriXchange Backend MVP — Implementation Steps
 
-## Phase B1: Package Modules ✅
-- [x] packages/common — Shared types, currencies, errors, helpers
-- [x] packages/identity — Auth helpers (signup, profile, PIN, session)
-- [x] packages/kyc — KYC submission, approval, rejection, status
-- [x] packages/ledger — Append-only transaction ledger
-- [x] packages/wallet — Wallet CRUD, credit/debit/transfer
-- [x] packages/payments — Deposit + withdrawal via Paystack/bank
-- [x] packages/fx-conversion — Rate quotes + conversion execution
-- [x] packages/compliance — Rule engine, thresholds, flags
-- [x] packages/audit — Immutable audit log
-- [x] packages/notifications — Email/SMS/Push templates
+## ✅ Step 1: Create `useRealtimeTransactions.js` hook
+- Created `frontend/src/features/transactions/useRealtimeTransactions.js`
+- `useRealtimeTransactions` — subscribes to INSERT/UPDATE/DELETE on `transactions` for current user
+- `useRealtimeTransactionStatus` — simpler hook for tracking a specific transaction's status changes
 
-## Phase B2: API Server ✅
-- [x] apps/api/package.json — Express + cors + Supabase deps
-- [x] apps/api/src/index.js — All routes, auth middleware, service wiring
+## ✅ Step 2: Create `useRealtimeWallets.js` hook
+- Created `frontend/src/features/wallet/useRealtimeWallets.js`
+- `useRealtimeWallets` — subscribes to INSERT/UPDATE/DELETE on `wallets` for current user
+- `useRealtimeBalance` — simpler hook for tracking wallet balance updates for a specific currency
 
-## Phase B3: Supabase Edge Functions ✅
-- [x] supabase/functions/kyc-submit/index.js
-- [x] supabase/functions/kyc-webhook/index.js
-- [x] supabase/functions/paystack-webhook/index.js
-- [x] supabase/functions/initiate-withdrawal/index.js
-- [x] supabase/functions/initiate-deposit/index.js
-- [x] supabase/functions/get-conversion-rate/index.js
-- [x] supabase/functions/execute-conversion/index.js
-- [x] supabase/functions/compliance-check/index.js
+## ✅ Step 3: Integrate realtime subscriptions into AuthProvider
+- Updated `AuthProvider.jsx` to subscribe to `transactions` and `wallets` realtime channels on login
+- Subscriptions are cleaned up on logout
+- Latest updates tracked in context state
 
-## Phase B4: Infrastructure ✅
-- [x] supabase/config.toml — Auth, Storage, Edge Function config
-- [x] infrastructure/db-migrations/006_audit_logs.sql — Append-only audit table
-- [x] Root package.json with workspace config
+## ✅ Step 4: Add compliance check to `initiate-deposit` Edge Function
+- Updated `initiate-deposit/index.js` to call `compliance-check` after creating pending transaction
+- If compliance fails, returns `held: true` response with `heldTransactionUrl`
+- Wallet upsert still happens before compliance (harmless — zero balance)
+
+## ✅ Step 5: Add compliance check to `initiate-withdrawal` Edge Function
+- Updated `initiate-withdrawal/index.js` to call `compliance-check` before debiting wallet
+- If compliance fails, returns `held: true` response — wallet is NOT debited
+- Prevents fund movement on flagged transactions
+
+## ✅ Step 6: Add compliance check to `execute-conversion` Edge Function
+- Updated `execute-conversion/index.js` to create transaction as `pending` first
+- Calls `compliance-check` before updating to `success` and processing wallets
+- If compliance fails, returns `held: true` response — wallets are NOT modified
+

@@ -4,12 +4,25 @@
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
+  username text unique,
   phone text,
+  avatar_url text,
   kyc_status text default 'not_started',
   kyc_tier int default 0,
   transaction_pin_hash text,
   created_at timestamptz default now()
 );
+
+-- Add username and avatar_url columns if upgrading existing DB
+do $$
+begin
+  if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='username') then
+    alter table profiles add column username text unique;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='avatar_url') then
+    alter table profiles add column avatar_url text;
+  end if;
+end $$;
 
 -- RLS
 alter table profiles enable row level security;

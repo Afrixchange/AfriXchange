@@ -25,7 +25,7 @@ export default function RateTimer({ expiresAt, onExpire }) {
   const isExpiring = timeLeft <= 10
 
   return (
-    <div className={`flex items-center gap-1.5 text-sm font-medium ${isExpiring ? 'text-danger' : 'text-warning'}`}>
+    <div className={`flex items-center gap-1.5 text-sm font-medium ${isExpiring ? 'text-red-500' : 'text-amber-500'}`}>
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>

@@ -1,5 +1,7 @@
 import express from 'express'
+import path from 'path'
 import cors from 'cors'
+import { fileURLToPath } from 'url'
 import { createIdentityService } from '@afrixchange/identity'
 import { createKycService } from '@afrixchange/kyc'
 import { createWalletService } from '@afrixchange/wallet'
@@ -12,6 +14,11 @@ import { createAuditService } from '@afrixchange/audit'
 const PORT = parseInt(process.env.PORT || '3001', 10)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost:54321'
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'service-role-key'
+
+// ─── Resolve frontend build path ─────────────────────────────────
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const frontendDist = path.resolve(__dirname, '../../../frontend/dist')
 
 // ─── Initialize services ────────────────────────────────────────
 const identityService = createIdentityService(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -27,6 +34,9 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// Serve frontend static files (built Vite output)
+app.use(express.static(frontendDist))
+
 // ─── Auth middleware ─────────────────────────────────────────────
 async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization
@@ -41,6 +51,22 @@ async function authenticate(req, res, next) {
     next()
   } catch (err) {
     res.status(401).json({ error: err.message || 'Invalid token' })
+  }
+}
+
+// ─── KYC check middleware ────────────────────────────────────────
+async function requireKyc(req, res, next) {
+  try {
+    const profile = await identityService.getProfile(req.user.id)
+    if (!profile || profile.kyc_status !== 'approved') {
+      return res.status(403).json({
+        error: 'KYC verification required. Please complete identity verification first.',
+        kycStatus: profile?.kyc_status || 'not_started',
+      })
+    }
+    next()
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to verify KYC status' })
   }
 }
 
@@ -110,7 +136,7 @@ app.get('/api/transactions/:id', authenticate, async (req, res) => {
 })
 
 // ─── Deposit Routes ─────────────────────────────────────────────
-app.post('/api/deposit/initiate', authenticate, async (req, res) => {
+app.post('/api/deposit/initiate', authenticate, requireKyc, async (req, res) => {
   try {
     const { amount, currency, provider } = req.body
     const result = await paymentService.initiateDeposit({
@@ -141,7 +167,7 @@ app.post('/api/deposit/webhook', async (req, res) => {
 })
 
 // ─── Withdrawal Routes ──────────────────────────────────────────
-app.post('/api/withdraw/initiate', authenticate, async (req, res) => {
+app.post('/api/withdraw/initiate', authenticate, requireKyc, async (req, res) => {
   try {
     const { amount, currency, pin, bankDetails } = req.body
     const result = await paymentService.initiateWithdrawal({
@@ -159,7 +185,7 @@ app.post('/api/withdraw/initiate', authenticate, async (req, res) => {
 })
 
 // ─── Conversion Routes ──────────────────────────────────────────
-app.post('/api/conversion/rate', authenticate, async (req, res) => {
+app.post('/api/conversion/rate', authenticate, requireKyc, async (req, res) => {
   try {
     const { from, to } = req.body
     const rate = await conversionService.getRate(from.toUpperCase(), to.toUpperCase())
@@ -169,7 +195,7 @@ app.post('/api/conversion/rate', authenticate, async (req, res) => {
   }
 })
 
-app.post('/api/conversion/execute', authenticate, async (req, res) => {
+app.post('/api/conversion/execute', authenticate, requireKyc, async (req, res) => {
   try {
     const { quoteId, amount, pin } = req.body
     const result = await conversionService.executeConversion({
@@ -208,6 +234,11 @@ app.put('/api/profile', authenticate, async (req, res) => {
 // ─── Health Check ───────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '1.0.0', timestamp: new Date().toISOString() })
+})
+
+// ─── SPA fallback — serve index.html for any non-API route ──────
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'))
 })
 
 // ─── Start server ───────────────────────────────────────────────

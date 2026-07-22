@@ -25,12 +25,19 @@ Deno.serve(async (req) => {
 
     const { amount, currency, pin, bank_details } = await req.json()
 
-    // Verify PIN (simplified — in production, compare hash)
+    // Verify KYC is approved
     const { data: profile } = await supabase
       .from('profiles')
-      .select('transaction_pin_hash')
+      .select('kyc_status, transaction_pin_hash')
       .eq('id', user.id)
       .single()
+
+    if (!profile || profile.kyc_status !== 'approved') {
+      return new Response(JSON.stringify({
+        error: 'KYC verification required. Please complete identity verification before withdrawing.',
+        kycRequired: true,
+      }), { status: 403 })
+    }
 
     if (!profile?.transaction_pin_hash) {
       return new Response(JSON.stringify({ error: 'Transaction PIN not set' }), { status: 400 })
@@ -69,6 +76,38 @@ Deno.serve(async (req) => {
       .single()
 
     if (txError) throw txError
+
+    // Run compliance check before debiting
+    const complianceCheckUrl = `${supabaseUrl}/functions/v1/compliance-check`
+    const complianceResult = await fetch(complianceCheckUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        transaction_id: tx.id,
+        user_id: user.id,
+        type: 'withdraw',
+        amount: amountNum,
+      }),
+    }).then(r => r.json())
+
+    if (complianceResult.passed === false) {
+      // Transaction already flagged as 'held' by compliance-check function
+      return new Response(JSON.stringify({
+        transactionId: tx.id,
+        ref,
+        amount: amountNum,
+        currency,
+        held: true,
+        reason: complianceResult.reason || 'Transaction flagged for compliance review',
+        heldTransactionUrl: `/transaction/held/${tx.id}`,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
 
     // Debit wallet
     const newBalance = parseFloat(wallet.balance) - amountNum

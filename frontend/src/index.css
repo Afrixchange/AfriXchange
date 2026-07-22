@@ -1,29 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #aa3bff;
-  --color-primary-hover: #9333ea;
-  --color-primary-light: rgba(170, 59, 255, 0.1);
-  --color-secondary: #0ea5e9;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-dark: #08060d;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  /* Brand tokens */
+  --color-brand: #5B1FB0;
+  --color-brand-dark: #4A1990;
+  --color-brand-light: #7A2FD6;
+  --color-surface: #F3EFF9;
+  --color-surface-card: #FFFFFF;
+  --color-ink: #3A2E52;
+  --color-border-subtle: #EAE3F7;
+
+  /* Font families */
+  --font-poppins: "Poppins", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Rounded scale */
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-inter);
+  color: var(--color-ink);
+  background: var(--color-surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -31,4 +32,3 @@ body {
 #root {
   min-height: 100vh;
 }
-

@@ -42,20 +42,20 @@ export default function OtpVerify() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-surface">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">AfriXchange</Link>
-          <h2 className="text-2xl font-bold text-dark mt-6">Verify your email</h2>
-          <p className="text-gray-500 mt-2">
+          <Link to="/" className="text-2xl font-bold text-brand">AfriXchange</Link>
+          <h2 className="text-2xl font-bold text-ink mt-6">Verify your email</h2>
+          <p className="text-ink/60 mt-2">
             We sent a verification code to<br />
-            <span className="font-semibold text-dark">{email || 'your email'}</span>
+            <span className="font-semibold text-ink">{email || 'your email'}</span>
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-surface-card p-8 rounded-xl shadow-sm border border-border-subtle space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -77,7 +77,7 @@ export default function OtpVerify() {
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-sm text-brand hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resending ? 'Resending...' : 'Resend code'}
             </button>

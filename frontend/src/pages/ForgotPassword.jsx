@@ -35,17 +35,17 @@ export default function ForgotPassword() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-surface">
         <div className="w-full max-w-md text-center">
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-            <div className="w-16 h-16 bg-success rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-surface-card p-8 rounded-xl shadow-sm border border-border-subtle">
+            <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-dark mb-2">Check your email</h2>
-            <p className="text-gray-500 mb-6">
-              We've sent a password reset link to <span className="font-semibold text-dark">{email}</span>
+            <h2 className="text-2xl font-bold text-ink mb-2">Check your email</h2>
+            <p className="text-ink/60 mb-6">
+              We've sent a password reset link to <span className="font-semibold text-ink">{email}</span>
             </p>
             <Link to="/login">
               <Button variant="outline">Back to Login</Button>
@@ -57,17 +57,17 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-surface">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">AfriXchange</Link>
-          <h2 className="text-2xl font-bold text-dark mt-6">Forgot password?</h2>
-          <p className="text-gray-500 mt-2">Enter your email and we'll send you a reset link</p>
+          <Link to="/" className="text-2xl font-bold text-brand">AfriXchange</Link>
+          <h2 className="text-2xl font-bold text-ink mt-6">Forgot password?</h2>
+          <p className="text-ink/60 mt-2">Enter your email and we'll send you a reset link</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-surface-card p-8 rounded-xl shadow-sm border border-border-subtle space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
@@ -84,9 +84,9 @@ export default function ForgotPassword() {
             Send Reset Link
           </Button>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-ink/60 mt-4">
             Remember your password?{' '}
-            <Link to="/login" className="text-primary font-semibold hover:underline">
+            <Link to="/login" className="text-brand font-semibold hover:underline">
               Log In
             </Link>
           </p>
