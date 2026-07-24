@@ -1,4 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
+import BrandLogo from '../BrandLogo'
+import ThemeToggle from '../ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/home', label: 'Home', d: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10' },
@@ -12,7 +14,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 bg-surface-card border-r border-border-subtle min-h-screen fixed top-0 left-0">
       <div className="p-6 border-b border-border-subtle">
-        <Link to="/home" className="text-2xl font-poppins font-bold text-brand">AfriXchange</Link>
+        <BrandLogo to="/home" compact />
       </div>
       <nav className="flex-1 p-4 space-y-1">
         {NAV_ITEMS.map(item => {
@@ -22,7 +24,7 @@ export default function Sidebar() {
               key={item.to}
               to={item.to}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
-                ${active ? 'bg-brand text-white' : 'text-ink/60 hover:bg-surface hover:text-ink'}
+                ${active ? 'bg-brand text-white shadow-sm shadow-brand/20' : 'text-ink/60 hover:bg-surface hover:text-ink'}
               `}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -34,6 +36,9 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="p-4 border-t border-border-subtle">
+        <div className="mb-2 px-4">
+          <ThemeToggle />
+        </div>
         <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink/60 hover:bg-surface hover:text-ink transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

@@ -2,13 +2,17 @@
 
 @theme {
   /* Brand tokens */
-  --color-brand: #5B1FB0;
-  --color-brand-dark: #4A1990;
-  --color-brand-light: #7A2FD6;
-  --color-surface: #F3EFF9;
+  --color-brand: #0E4F3F;
+  --color-brand-dark: #083A2F;
+  --color-brand-light: #1C755F;
+  --color-accent: #EBAE3F;
+  --color-accent-dark: #C88D23;
+  --color-surface: #F4F7F2;
   --color-surface-card: #FFFFFF;
-  --color-ink: #3A2E52;
-  --color-border-subtle: #EAE3F7;
+  --color-ink: #142C25;
+  --color-border-subtle: #DDE8E1;
+  --color-page-start: #F8FAF6;
+  --color-page-glow: rgba(235, 174, 63, 0.14);
 
   /* Font families */
   --font-poppins: "Poppins", sans-serif;
@@ -24,11 +28,32 @@ body {
   margin: 0;
   font-family: var(--font-inter);
   color: var(--color-ink);
-  background: var(--color-surface);
+  background:
+    radial-gradient(circle at top left, var(--color-page-glow), transparent 28rem),
+    linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark {
+  --color-brand: #2BC097;
+  --color-brand-dark: #0B2D26;
+  --color-brand-light: #54D8B5;
+  --color-accent: #F0B84B;
+  --color-accent-dark: #FFD986;
+  --color-surface: #071A16;
+  --color-surface-card: #102720;
+  --color-ink: #EAF6F1;
+  --color-border-subtle: #23443A;
+  --color-page-start: #061410;
+  --color-page-glow: rgba(240, 184, 75, 0.12);
+}
+
 #root {
   min-height: 100vh;
+}
+
+::selection {
+  color: white;
+  background: var(--color-brand);
 }

@@ -10,7 +10,7 @@ const NAV = [
 export default function BottomNav() {
   const { pathname } = useLocation()
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-card border-t border-border-subtle px-2 pb-safe">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-card/95 border-t border-border-subtle px-2 pb-safe backdrop-blur">
       <div className="flex justify-around py-2">
         {NAV.map(item => {
           const active = pathname === item.to
@@ -19,7 +19,7 @@ export default function BottomNav() {
               key={item.to}
               to={item.to}
               className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors
-                ${active ? 'text-brand' : 'text-ink/40 hover:text-ink/60'}
+                ${active ? 'text-brand bg-accent/15' : 'text-ink/40 hover:text-ink/60'}
               `}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,9 +1,9 @@
 const variants = {
-  primary: 'bg-brand text-white hover:bg-brand-dark focus:outline-brand',
-  secondary: 'bg-surface text-ink hover:bg-surface/80 focus:outline-brand',
+  primary: 'bg-accent text-brand-dark hover:bg-accent-dark hover:text-white focus:outline-accent',
+  secondary: 'bg-surface text-ink hover:bg-brand/5 focus:outline-brand',
   danger: 'bg-red-500 text-white hover:bg-red-600 focus:outline-red-500',
-  ghost: 'bg-transparent text-ink/60 hover:bg-surface focus:outline-brand',
-  outline: 'border-2 border-brand text-brand hover:bg-surface focus:outline-brand'
+  ghost: 'bg-transparent text-ink/70 hover:bg-brand/5 hover:text-brand focus:outline-brand',
+  outline: 'border-2 border-brand text-brand hover:bg-brand hover:text-white focus:outline-brand'
 }
 
 const sizes = {

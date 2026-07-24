@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext(null)
 
@@ -15,6 +15,11 @@ export function AuthProvider({ children }) {
   const realtimeSubs = useRef([])
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -114,6 +119,13 @@ export function AuthProvider({ children }) {
   }
 
   async function signUp(email, password, fullName, phone, username) {
+    if (!isSupabaseConfigured) {
+      return {
+        data: null,
+        error: new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to frontend/.env, then restart the frontend server.')
+      }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -139,6 +151,13 @@ export function AuthProvider({ children }) {
   }
 
   async function signIn(email, password) {
+    if (!isSupabaseConfigured) {
+      return {
+        data: null,
+        error: new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to frontend/.env, then restart the frontend server.')
+      }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -174,6 +193,18 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`
     })
+    return { data, error }
+  }
+
+  async function updatePassword(password) {
+    if (!isSupabaseConfigured) {
+      return {
+        data: null,
+        error: new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to frontend/.env, then restart the frontend server.')
+      }
+    }
+
+    const { data, error } = await supabase.auth.updateUser({ password })
     return { data, error }
   }
 
@@ -229,6 +260,7 @@ export function AuthProvider({ children }) {
     sendOtp,
     verifyOtp,
     resetPassword,
+    updatePassword,
     updateProfile,
     uploadAvatar,
     refreshProfile: () => user && fetchProfile(user.id)

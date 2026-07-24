@@ -58,7 +58,7 @@ export default function TransactionHistory() {
               {transactions.map(tx => (
                 <Link
                   key={tx.id}
-                  to={tx.status === 'held' ? `/transaction/held/${tx.id}` : '#'}
+                  to={tx.status === 'held' ? `/transaction/held/${tx.id}` : `/transaction/${tx.id}`}
                   className="block bg-surface-card rounded-xl border border-border-subtle p-4 hover:shadow-sm transition-shadow"
                 >
                   <div className="flex items-center gap-3">

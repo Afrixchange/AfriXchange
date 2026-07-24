@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import BrandLogo from '../components/BrandLogo'
+import ThemeToggle from '../components/ThemeToggle'
 import { useWallets } from '../features/wallet/useWallets'
 
 const NAV = [
-  { to: '/', label: 'Home', d: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10' },
+  { to: '/home', label: 'Home', d: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10' },
   { to: '/wallets', label: 'Wallets', d: 'M3 7a2 2 0 012-2h11a2 2 0 012 2v1h1a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z' },
   { to: '/transactions', label: 'Transactions', d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { to: '/help', label: 'Help', d: 'M8.2 8a3.8 3.8 0 117.1 1.9c-.7 1.2-2 1.7-2.3 2.9M12 17h.01M12 21a9 9 0 100-18 9 9 0 000 18z' },
@@ -42,11 +44,9 @@ export default function Home() {
     <div className="min-h-screen bg-[var(--color-surface)] md:flex">
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-white border-r border-[var(--color-surface)]">
+      <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-surface-card border-r border-border-subtle">
         <div className="px-6 py-6">
-          <span className="font-[Poppins] font-semibold text-lg text-[var(--color-ink)]">
-            <span className="text-[var(--color-brand)]">Afri</span>Xchange
-          </span>
+          <BrandLogo to="/home" compact />
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {NAV.map(item => {
@@ -56,7 +56,7 @@ export default function Home() {
                 key={item.to}
                 to={item.to}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] ${
-                  active ? 'bg-[var(--color-brand)] text-white' : 'text-[var(--color-ink)]/70 hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]'
+                  active ? 'bg-brand text-white shadow-sm shadow-brand/20' : 'text-ink/70 hover:bg-surface hover:text-ink'
                 }`}
               >
                 <svg className="w-4.5 h-4.5 shrink-0" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@ export default function Home() {
       <div className="flex-1 md:ml-64">
 
         {/* Mobile purple hero — hidden on desktop */}
-        <header className="md:hidden bg-gradient-to-b from-[var(--color-brand)] to-[#7A2FD6] px-4 pt-6 pb-16 rounded-b-[32px]">
+        <header className="md:hidden bg-brand px-4 pt-6 pb-16 rounded-b-[32px] shadow-xl shadow-brand/20">
           <div className="max-w-lg mx-auto">
             <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -113,6 +113,7 @@ export default function Home() {
               </div>
             </div>
               <div className="flex items-center gap-3">
+                <ThemeToggle className="border-white/15 bg-white/10 text-white hover:border-accent/50 hover:bg-white/15 hover:text-accent focus-visible:outline-white" />
                 <Link to="/profile" aria-label="Profile" className="text-white/70 hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.4-1.4a2 2 0 01-.6-1.4V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0m6 0H9" />
@@ -126,7 +127,7 @@ export default function Home() {
               </div>
             </div>
 
-            <p className="text-white/60 text-sm mb-1">Total balance (NGN)</p>
+            <p className="text-accent text-sm font-medium mb-1">Total balance (NGN)</p>
             <div className="flex items-center gap-3">
               <p className="text-white font-[Poppins] font-semibold text-3xl">
                 {showBalance ? `₦${totalNGN.toLocaleString()}.00` : '••••••'}
@@ -154,6 +155,7 @@ export default function Home() {
             <p className="text-[var(--color-ink)]/50 text-sm">Welcome back</p>
             <h1 className="font-[Poppins] font-semibold text-2xl text-[var(--color-ink)]">{firstName}</h1>
           </div>
+          <ThemeToggle />
         </header>
 
         <main className="max-w-lg md:max-w-none mx-auto md:mx-0 px-4 md:px-8 -mt-10 md:mt-0 pb-10 md:pb-8">
@@ -163,8 +165,8 @@ export default function Home() {
             <div className="md:col-span-2 space-y-6">
 
               {/* Desktop balance card — hidden on mobile (mobile shows it in the hero above) */}
-              <section className="hidden md:block bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-6">
-                <p className="text-white/60 text-sm mb-1">Total balance (NGN)</p>
+              <section className="hidden md:block bg-brand rounded-2xl p-6 shadow-xl shadow-brand/10">
+                <p className="text-accent text-sm font-medium mb-1">Total balance (NGN)</p>
                 <div className="flex items-center gap-3">
                   <p className="text-white font-[Poppins] font-semibold text-3xl">
                     {showBalance ? `₦${totalNGN.toLocaleString()}.00` : '••••••'}
@@ -186,11 +188,11 @@ export default function Home() {
               </section>
 
               {/* Quick actions */}
-              <section className="bg-white rounded-3xl shadow-lg shadow-[var(--color-brand)]/10 p-5 grid grid-cols-4 gap-2">
+              <section className="bg-surface-card rounded-3xl shadow-lg shadow-brand/10 p-5 grid grid-cols-4 gap-2 border border-border-subtle">
                 {ACTIONS.map(action => (
                   <Link key={action.to} to={action.to} className="flex flex-col items-center gap-2 group rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]">
-                    <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] group-hover:bg-[var(--color-brand)] flex items-center justify-center transition-colors">
-                      <svg className="w-5 h-5 text-[var(--color-brand)] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-12 h-12 rounded-full bg-accent/15 group-hover:bg-accent flex items-center justify-center transition-colors">
+                      <svg className="w-5 h-5 text-brand group-hover:text-brand-dark transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={action.d} />
                       </svg>
                     </div>
@@ -210,10 +212,10 @@ export default function Home() {
                     <Link
                       key={wallet.currency}
                       to={`/wallet/${wallet.currency}`}
-                      className="flex items-center justify-between md:flex-col md:items-start md:gap-4 bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
+                      className="flex items-center justify-between md:flex-col md:items-start md:gap-4 bg-surface-card rounded-2xl p-4 shadow-sm border border-border-subtle hover:shadow-md hover:border-brand/20 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-brand)] font-semibold text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-accent font-semibold text-sm shrink-0">
                           {wallet.currency.charAt(0)}
                         </div>
                         <div>
@@ -237,17 +239,17 @@ export default function Home() {
 
             {/* Right column — desktop only companion panel */}
             <div className="hidden md:block space-y-6">
-              <section className="bg-white rounded-2xl p-5 shadow-sm">
+              <section className="bg-surface-card rounded-2xl p-5 shadow-sm border border-border-subtle">
                 <h3 className="font-[Poppins] font-medium text-sm text-[var(--color-ink)] mb-3">Recent activity</h3>
                 <p className="text-sm text-[var(--color-ink)]/40">No transactions yet.</p>
               </section>
 
-              <section className="bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-5">
+              <section className="bg-brand rounded-2xl p-5 shadow-lg shadow-brand/10">
                 <p className="text-white font-[Poppins] font-medium text-sm">Need a hand?</p>
                 <p className="text-white/70 text-xs mt-0.5 mb-4">We're here 24/7</p>
                 <Link
                   to="/help"
-                  className="inline-block bg-white text-[var(--color-brand)] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-block bg-accent text-brand-dark text-xs font-semibold px-4 py-2 rounded-full hover:bg-accent-dark hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Get support
                 </Link>
@@ -256,14 +258,14 @@ export default function Home() {
           </div>
 
           {/* Mobile-only promo strip */}
-          <section className="md:hidden mt-6 bg-gradient-to-r from-[var(--color-brand)] to-[#7A2FD6] rounded-2xl p-5 flex items-center justify-between">
+          <section className="md:hidden mt-6 bg-brand rounded-2xl p-5 flex items-center justify-between">
             <div>
               <p className="text-white font-[Poppins] font-medium text-sm">Need a hand?</p>
               <p className="text-white/70 text-xs mt-0.5">We're here 24/7</p>
             </div>
             <Link
               to="/help"
-              className="bg-white text-[var(--color-brand)] text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="bg-accent text-brand-dark text-xs font-semibold px-4 py-2 rounded-full hover:bg-accent-dark hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Get support
             </Link>
@@ -272,7 +274,7 @@ export default function Home() {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-[var(--color-surface)] px-2 py-2 flex items-center justify-around">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-surface-card border-t border-border-subtle px-2 py-2 flex items-center justify-around">
         {NAV.map(item => {
           const active = pathname === item.to
           return (

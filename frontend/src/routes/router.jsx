@@ -5,11 +5,14 @@ import SignUp from '../pages/SignUp'
 import Login from '../pages/Login'
 import OtpVerify from '../pages/OtpVerify'
 import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 import Onboarding from '../pages/Onboarding'
 import Home from '../pages/Home'
 import Wallets from '../pages/Wallets'
+import AddWallet from '../pages/AddWallet'
 import WalletDetail from '../pages/WalletDetail'
 import TransactionHistory from '../pages/TransactionHistory'
+import TransactionDetail from '../pages/TransactionDetail'
 import Deposit from '../pages/Deposit'
 import DepositReceipt from '../pages/DepositReceipt'
 import Withdraw from '../pages/Withdraw'
@@ -24,6 +27,7 @@ import SelfieCapture from '../pages/kyc/SelfieCapture'
 import VerificationPending from '../pages/kyc/VerificationPending'
 import VerificationRejected from '../pages/kyc/VerificationRejected'
 import Profile from '../pages/Profile'
+import EditProfile from '../pages/Editprofile'
 import Help from '../pages/Help'
 import NotFoundRedirect from '../components/NotFoundRedirect'
 
@@ -60,7 +64,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <GuestRoute><Login /></GuestRoute> },
   { path: '/verify-otp', element: <GuestRoute><OtpVerify /></GuestRoute> },
   { path: '/forgot-password', element: <GuestRoute><ForgotPassword /></GuestRoute> },
-  { path: '/reset-password', element: <GuestRoute><ForgotPassword /></GuestRoute> },
+  { path: '/reset-password', element: <ResetPassword /> },
 
   // Onboarding (auth required, shown to new users)
   { path: '/onboarding', element: <ProtectedRoute><Onboarding /></ProtectedRoute> },
@@ -75,6 +79,7 @@ export const router = createBrowserRouter([
   // Protected routes (auth + KYC approved)
   { path: '/home', element: <ProtectedRoute requireKyc><Home /></ProtectedRoute> },
   { path: '/wallets', element: <ProtectedRoute requireKyc><Wallets /></ProtectedRoute> },
+  { path: '/wallets/add', element: <ProtectedRoute requireKyc><AddWallet /></ProtectedRoute> },
   { path: '/wallet/:currency', element: <ProtectedRoute requireKyc><WalletDetail /></ProtectedRoute> },
   { path: '/transactions', element: <ProtectedRoute requireKyc><TransactionHistory /></ProtectedRoute> },
   { path: '/deposit', element: <ProtectedRoute requireKyc><Deposit /></ProtectedRoute> },
@@ -85,7 +90,9 @@ export const router = createBrowserRouter([
   { path: '/convert/summary', element: <ProtectedRoute requireKyc><ConvertSummary /></ProtectedRoute> },
   { path: '/convert/receipt/:id', element: <ProtectedRoute requireKyc><ConvertReceipt /></ProtectedRoute> },
   { path: '/transaction/held/:id', element: <ProtectedRoute requireKyc><TransactionHeld /></ProtectedRoute> },
+  { path: '/transaction/:id', element: <ProtectedRoute requireKyc><TransactionDetail /></ProtectedRoute> },
   { path: '/profile', element: <ProtectedRoute><Profile /></ProtectedRoute> },
+  { path: '/profile/edit', element: <ProtectedRoute><EditProfile /></ProtectedRoute> },
   { path: '/help', element: <Help /> },
 
   // 404 fallback — redirect to welcome if not logged in, home if logged in
