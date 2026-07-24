@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createHashRouter, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import Welcome from '../pages/Welcome'
 import SignUp from '../pages/SignUp'
@@ -57,7 +57,7 @@ function GuestRoute({ children }) {
 
 export { ProtectedRoute, GuestRoute }
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   // Public / Guest routes
   { path: '/', element: <GuestRoute><Welcome /></GuestRoute> },
   { path: '/signup', element: <GuestRoute><SignUp /></GuestRoute> },
